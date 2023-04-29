@@ -22,10 +22,9 @@ pip install -r requirements.txt
 
 ### DEPOIS DE INSTALADO TUDO E COM A VENV ATIVADA
 ```git
-python app.pyc
+python app.py
 ```
-### DEPOIS DE INSTALADO TUDO E COM A VENV ATIVADA
-Caso tenha algum erro de nao reconhecer alguma lib
+### Caso tenha algum erro de nao reconhecer alguma lib
 ```git
 pip install <lib_name>
 ```
@@ -54,6 +53,6 @@ Para rodar os testes basta instalar o requirements.txt dentro dos testes, pode c
 
 Após instalar o requirements.txt dos testes e com o terminal estando no caminho do projeto:
 ```git
-pytest -sv
+pytest -s
 ```
 Esse comando vai rodar todos os testes, ele le tudo que começar com "test" e roda. 
