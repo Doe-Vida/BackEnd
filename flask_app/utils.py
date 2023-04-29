@@ -1,3 +1,18 @@
+import re
+
+def is_valid_email(email):
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+def check_username(email):
+    if len(email) > 80:
+        return {"Erro": "Seu email precisa ter menos que 80 caracteres."}
+    if email is None or len(email) == 0:
+        return {"Erro": "O campo e-mail não pode estar vazio."}
+    if is_valid_email(email) == False:
+        return {"Erro": "O e-mail não é válido."}
+    return None
+
 def check_and_update(user, **json_data):
     if json_data.get('first_name') is not None:
         user.first_name = json_data['first_name']

@@ -1,18 +1,22 @@
 from . import app, db
 from flask import jsonify, request
 from flask_app.models import User
-from flask_app.utils import check_and_update
+from flask_app.utils import check_and_update, check_username
 
 
 @app.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
-    return jsonify([user.to_dict() for user in users]), 200
+    return jsonify([user.to_dict() for user in users]), 
 
 @app.route('/users', methods=['POST'])
 def add_new_user():
     new_user = request.get_json()
+    validation = check_username(new_user['username'])
+    if validation != None:
+        return validation, 400
     new_user = User(username=new_user['username'], password=new_user['password'])
+    new_user.set_password(new_user.password)
     db.session.add(new_user)
     db.session.commit()
     return jsonify(new_user.to_dict()), 200

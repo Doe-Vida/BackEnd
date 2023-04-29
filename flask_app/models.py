@@ -1,5 +1,6 @@
 from . import db
 import json
+import bcrypt
 
 # defines model for user
 class User(db.Model):
@@ -37,4 +38,9 @@ class User(db.Model):
                 'city': self.city
             }
 
-    
+    def set_password(self, password):
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        self.password = hashed_password.decode('utf-8')
+
+    def check_password(self, password):
+        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
