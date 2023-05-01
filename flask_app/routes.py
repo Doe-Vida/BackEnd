@@ -1,13 +1,14 @@
 from . import app, db
 from flask import jsonify, request
 from flask_app.models import User
-from flask_app.utils import check_and_update, check_username
-
+from flask_app.utils import check_and_update, check_username, token_required
+import jwt
+from flask_jwt_extended import jwt_required
 
 @app.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
-    return jsonify([user.to_dict() for user in users]), 
+    return jsonify([user.to_dict() for user in users]), 200
 
 @app.route('/users', methods=['POST'])
 def add_new_user():
@@ -21,7 +22,24 @@ def add_new_user():
     db.session.commit()
     return jsonify(new_user.to_dict()), 200
 
+@app.route('/login', methods=["POST"])
+def login():
+    user = request.get_json()
+    try:
+        user_db = User.query.filter_by(username=user["username"]).first()
+        print(user_db.check_password(user["password"]))
+        if user_db.check_password(user["password"]) == True:
+            payload = {'user_id': user_db.id, 'exp': None}
+            token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+            return {'token': token}, 200
+        else:
+            return jsonify({"Erro": "Wrong password"}), 403
+    except:
+        return jsonify({"Erro": "User not found"}), 404
+
+
 @app.route('/users/<string:username>', methods=['GET'])
+@token_required
 def get_user_by_username(username):
     user = User.query.filter_by(username=username).first()
     if user is None:

@@ -1,4 +1,29 @@
 import re
+import jwt
+from flask import jsonify, request
+from functools import wraps
+from . import app
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.args.get('Token')
+
+        print(request.url)
+        print(token)
+
+        if not token:
+            return jsonify({'mensagem': 'Token ausente!'}), 403
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+        except:
+            return jsonify({'mensagem': 'Token inválido!'}), 403
+
+        return f(*args, **kwargs)
+
+    return decorated
+
 
 def is_valid_email(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
