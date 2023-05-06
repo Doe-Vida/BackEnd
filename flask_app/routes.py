@@ -4,6 +4,7 @@ from flask_app.models import User
 from flask_app.utils import check_and_update, check_username, token_required
 import jwt
 from flask_jwt_extended import jwt_required
+from datetime import datetime, timedelta
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -29,7 +30,7 @@ def login():
         user_db = User.query.filter_by(username=user["username"]).first()
         print(user_db.check_password(user["password"]))
         if user_db.check_password(user["password"]) == True:
-            payload = {'user_id': user_db.id, 'exp': None}
+            payload = {'user_id': user_db.id, 'exp': datetime.utcnow() + timedelta(minutes=10)} # expira em 10 minutos
             token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
             return {'token': token}, 200
         else:
@@ -38,8 +39,8 @@ def login():
         return jsonify({"Erro": "User not found"}), 404
 
 
-@app.route('/users/<string:username>', methods=['GET'])
 @token_required
+@app.route('/users/<string:username>', methods=['GET'])
 def get_user_by_username(username):
     user = User.query.filter_by(username=username).first()
     if user is None:

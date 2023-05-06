@@ -1,26 +1,45 @@
 import re
 import jwt
-from flask import jsonify, request
+from flask import jsonify, request, g
 from functools import wraps
 from . import app
+from jwt.exceptions import DecodeError, ExpiredSignatureError
+from datetime import datetime
 
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.args.get('Token')
+        token = None
 
-        print(request.url)
+        # Verifica se o token está presente nos headers da requisição
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(' ')[1]
+            #token = token.split(' ')
+            #token = token[0]
         print(token)
-
+        
+        
+        # Caso o token não esteja presente
         if not token:
-            return jsonify({'mensagem': 'Token ausente!'}), 403
+            return jsonify({'error': 'Token não encontrado!'}), 401
 
         try:
-            data = jwt.decode(token, app.config['SECRET_KEY'])
-        except:
-            return jsonify({'mensagem': 'Token inválido!'}), 403
+            # Decodifica o token
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            exp = data.get("exp")
+            if exp is not None:
+                now = datetime.utcnow()
+                if now < datetime.fromtimestamp(exp):
+                    return jsonify({'mensagem': 'Token de acesso expirado'}), 401
+            g.current_user = data
 
-        return f(*args, **kwargs)
+        except ExpiredSignatureError:
+            return jsonify({'error': 'Token expirado!'}), 401
+        except DecodeError:
+            return jsonify({'error': 'Token inválido!'}), 401
+
+        # Passa o identificador do usuário como argumento para a função da rota
+        return f(data['username'], *args, **kwargs)
 
     return decorated
 
