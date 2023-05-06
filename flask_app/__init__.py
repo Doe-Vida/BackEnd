@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
+from flask_jwt_extended import JWTManager
+from datetime import timedelta
 
 load_dotenv()
 
@@ -11,7 +13,11 @@ DATABASE_URI = os.getenv('DATABASE_URI')
 app = Flask(__name__) # creates a flask app with the name of the file as a parameter
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db' # configure database path
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
-app.config['SECRET_KEY'] = "chave_secreta"
+#app.config['SECRET_KEY'] = "chave_secreta"
+app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
+jwt__ = JWTManager(app)
 db = SQLAlchemy(app) # initialize sqlalchemy object
 migrate = Migrate(app, db)
 

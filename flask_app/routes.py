@@ -1,9 +1,11 @@
-from . import app, db
+from . import app, db, jwt__
 from flask import jsonify, request
 from flask_app.models import User
 from flask_app.utils import check_and_update, check_username, token_required
-import jwt
-from flask_jwt_extended import jwt_required
+#import jwt
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_token, create_access_token
+from datetime import datetime, timedelta
+
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -27,19 +29,25 @@ def login():
     user = request.get_json()
     try:
         user_db = User.query.filter_by(username=user["username"]).first()
-        print(user_db.check_password(user["password"]))
-        if user_db.check_password(user["password"]) == True:
-            payload = {'user_id': user_db.id, 'exp': None}
-            token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
-            return {'token': token}, 200
+        if user_db.check_password(user["password" ]) == True:
+            access_token = create_access_token(identity=user_db.username)
+            refresh_token = create_refresh_token(identity=user_db.username)
+            return jsonify(access_token=access_token, refresh_token=refresh_token)
         else:
             return jsonify({"Erro": "Wrong password"}), 403
-    except:
+    except Exception as e:
         return jsonify({"Erro": "User not found"}), 404
+    
+@app.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity)
+    return jsonify(access_token=access_token)
 
-
+@jwt_required()
+#@token_required #token que expira
 @app.route('/users/<string:username>', methods=['GET'])
-@token_required
 def get_user_by_username(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
