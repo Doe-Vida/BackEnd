@@ -1,11 +1,14 @@
-from . import app, db, jwt__
+from flask_app import  db, jwt__
 from flask import jsonify, request
 from flask_app.models import User
-from flask_app.utils import check_and_update, check_username, token_required
-#import jwt
+from flask_app.utils import check_and_update, check_username
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_refresh_token, create_access_token
-from datetime import datetime, timedelta
 
+def get_app():
+    from flask_app import app
+    return app
+
+app = get_app()
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -37,16 +40,15 @@ def login():
             return jsonify({"Erro": "Wrong password"}), 403
     except Exception as e:
         return jsonify({"Erro": "User not found"}), 404
-    
+
+#@jwt_required(refresh=True)
 @app.route("/refresh", methods=["POST"])
-@jwt_required(refresh=True)
 def refresh():
     identity = get_jwt_identity()
     access_token = create_access_token(identity=identity)
     return jsonify(access_token=access_token)
 
-@jwt_required()
-#@token_required #token que expira
+#@jwt_required()
 @app.route('/users/<string:username>', methods=['GET'])
 def get_user_by_username(username):
     user = User.query.filter_by(username=username).first()
@@ -54,13 +56,15 @@ def get_user_by_username(username):
         return jsonify({"Error": "User not found"}), 404
     return jsonify(user.to_dict()), 200
 
+@jwt_required()
 @app.route('/users/<int:id>', methods=['GET'])
 def get_user_by_id(id):
     user = User.query.get(id)
     if user is None:
         return jsonify({"Error": "User not found"}), 404
     return jsonify(user.to_dict()), 200
-    
+
+@jwt_required()   
 @app.route('/users/<string:username>', methods=['PUT'])
 def update_user_by_username(username):
     user = User.query.filter_by(username=username).first()
@@ -72,7 +76,7 @@ def update_user_by_username(username):
     db.session.commit()
     return jsonify(user.to_dict()), 200
 
-
+@jwt_required()
 @app.route('/users/<string:username>', methods=['DELETE'])
 def delete_user_by_username(username):
     user = User.query.filter_by(username=username).first()
@@ -81,3 +85,4 @@ def delete_user_by_username(username):
     db.session.delete(user)
     db.session.commit()
     return jsonify({"success": "deleted user"}), 200
+

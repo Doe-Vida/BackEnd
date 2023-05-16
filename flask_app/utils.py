@@ -3,6 +3,7 @@ import jwt
 from flask import jsonify, request
 from functools import wraps
 from . import app
+from flask_app.models import Hospitals
 
 def token_required(f):
     @wraps(f)
@@ -60,3 +61,27 @@ def check_and_update(user, **json_data):
     if json_data.get('city') is not None:
         user.city = json_data['city']
     return user
+
+def check_and_update_hospitals(hospital, **json_data):
+  if json_data.get('hospital_name') is not None:
+    hospital.hospital_name = json_data['hospital_name']
+  if json_data.get('city_name') is not None:
+    hospital.city_name = json_data['city_name']
+  if json_data.get('state') is not None:
+    hospital.state = json_data['state']
+  if json_data.get('donations_orders') is not None:
+    hospital.donations_orders = json_data['donations_orders']
+  if json_data.get('donations_orders_done') is not None:
+    hospital.donations_orders_done = json_data['donations_orders_done']
+  if json_data.get('donations_orders_cancelled') is not None:
+    hospital.donations_orders_cancelled = json_data['donations_orders_cancelled']
+  return hospital
+
+def check_hospital_db(hospital, city_name, state):
+    try:
+        hospital = Hospitals.query.filter_by(hospital_name=hospital).first()
+        if hospital.city_name == city_name and hospital.state == state:
+            return True
+    except:
+        return False
+

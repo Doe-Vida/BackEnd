@@ -1,6 +1,7 @@
 from . import db
-import json
 import bcrypt
+from datetime import datetime
+import json
 
 # defines model for user
 class User(db.Model):
@@ -17,6 +18,7 @@ class User(db.Model):
     date_last_donation = db.Column(db.String(10))
     state = db.Column(db.String(30))
     city = db.Column(db.String(60))
+    donation_order = db.relationship("Donation_order", backref="user")
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -35,7 +37,8 @@ class User(db.Model):
                 'qty_donations': (self.qty_donations),
                 'date_last_donation': self.date_last_donation,
                 'state': self.state,
-                'city': self.city
+                'city': self.city,
+                'donations_orders': f'{self.get_donations()}'
             }
 
     def set_password(self, password):
@@ -44,3 +47,64 @@ class User(db.Model):
 
     def check_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
+    
+    def get_donations(self):
+         
+         orders_list = []
+         for i in range(len(self.donation_order)):
+              orders_list.append(self.donation_order[i].id)
+         return orders_list
+
+class Hospitals(db.Model):
+     id = db.Column(db.Integer, primary_key=True)
+     hospital_name = db.Column(db.String(80), unique=True, nullable=False)
+     city_name = db.Column(db.String(80), nullable=False)
+     state = db.Column(db.Integer, nullable=False)
+     donations_orders = db.Column(db.Integer)
+     donations_orders_done = db.Column(db.Integer)
+     donations_orders_cancelled = db.Column(db.Integer)
+     donation_order = db.relationship("Donation_order", backref='hospitals')
+
+     def __repr__(self):
+        return '<Hospitals %r>' % self.hospital_name
+     
+     def to_dict(self):
+            return {
+                'id': str(self.id),
+                'hospital_name': self.hospital_name,
+                'city_name': self.city_name,
+                'state': self.state,
+                'donations_orders': self.donations_orders,
+                'donations_orders_done': self.donations_orders_done,
+                'donations_orders_cancelled': self.donations_orders_cancelled,
+            }
+    #quando for passar o hospital tem que passar com a variavel com o nome do que ta no backreff!!!!!!!! CORRIGIR
+class Donation_order(db.Model):
+    
+     id = db.Column(db.Integer, primary_key=True)
+     patient_name = db.Column(db.String(80), nullable=False)
+     blood_type = db.Column(db.Integer, nullable=False)
+     description = db.Column(db.String(500))
+     qty_bags = db.Column(db.Integer)
+     date_donation_order = db.Column(db.DateTime, default=datetime.utcnow)
+     city_name = db.Column(db.String(80))
+     state = db.Column(db.Integer)
+     hospital = db.Column(db.Integer, db.ForeignKey("hospitals.id"), nullable=False)
+     requester = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+
+     def __repr__(self):
+        return '<Donation_order %r>' % self.patient_name
+
+     def to_dict(self):
+            return {
+                'id': str(self.id),
+                'patient_name': self.patient_name,
+                'blood_type': self.blood_type,
+                'description': self.description,
+                'qty_bags': self.qty_bags,
+                'date_donation_order': self. date_donation_order,
+                'hospital': self.hospital,
+                'requester': self.requester
+
+            }
