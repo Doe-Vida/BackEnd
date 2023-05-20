@@ -1,7 +1,6 @@
 from . import db
 import bcrypt
 from datetime import datetime
-import json
 
 # defines model for user
 class User(db.Model):
@@ -91,7 +90,7 @@ class Donation_order(db.Model):
      state = db.Column(db.Integer)
      hospital = db.Column(db.Integer, db.ForeignKey("hospitals.id"), nullable=False)
      requester = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-
+     status = db.Column(db.String(40), default="open")
 
      def __repr__(self):
         return '<Donation_order %r>' % self.patient_name
@@ -105,6 +104,6 @@ class Donation_order(db.Model):
                 'qty_bags': self.qty_bags,
                 'date_donation_order': self. date_donation_order,
                 'hospital': self.hospital,
-                'requester': self.requester
-
+                'requester': self.requester,
+                'status': self.status
             }

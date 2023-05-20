@@ -2,7 +2,7 @@ import re
 import jwt
 from flask import jsonify, request
 from functools import wraps
-from . import app
+from . import app, db
 from flask_app.models import Hospitals
 
 def token_required(f):
@@ -84,4 +84,56 @@ def check_hospital_db(hospital, city_name, state):
             return True
     except:
         return False
+    
+def check_and_update_donations(donation_order, **json_data):
+  if json_data.get('patient_name') is not None:
+    donation_order.patient_name = json_data['patient_name']
+  if json_data.get('blood_type') is not None:
+    donation_order.blood_type = json_data['blood_type']
+  if json_data.get('description') is not None:
+    donation_order.description = json_data['description']
+  if json_data.get('qty_bags') is not None:
+    donation_order.qty_bags = json_data['qty_bags']
+  if json_data.get('date_donation_order') is not None:
+    donation_order.date_donation_order = json_data['date_donation_order']
+  if json_data.get('city_name') is not None:
+    donation_order.city_name = json_data['city_name']
+  if json_data.get('state') is not None:
+    donation_order.state = json_data['state']
+  if json_data.get('hospital') is not None:
+    donation_order.hospital = json_data['hospital']
+  if json_data.get('requester') is not None:
+    donation_order.requester = json_data['requester']
+  if json_data.get('status') is not None:
+    donation_order.status = json_data['status']
+  return donation_order
 
+def check_and_update_donation_status(order):
+   if order.status == "completed":
+      print(order.hospital)
+      hospital = Hospitals.query.get(order.hospital)
+      print(hospital)
+      if hospital.donations_orders_done is None:
+         hospital.donations_orders_done = 1
+      else:
+         hospital.donations_orders_done = hospital.donations_orders_done + 1 
+      db.session.add(hospital)
+      db.session.commit()
+
+      order.status = 'completed'
+      db.session.add(order)
+      db.session.commit()
+
+   if order.status == "cancelled":
+      hospital = Hospitals.query.get(order.hospital)
+      if hospital.donations_orders_cancelled is None:
+         hospital.donations_orders_cancelled = 1
+      else:
+         hospital.donations_orders_cancelled = hospital.donations_orders_cancelled + 1 
+      db.session.add(hospital)
+      db.session.commit()
+
+      order.status = 'cancelled'
+      db.session.add(order)
+      db.session.commit()
+    
