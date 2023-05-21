@@ -18,6 +18,8 @@ class User(db.Model):
     state = db.Column(db.String(30))
     city = db.Column(db.String(60))
     donation_order = db.relationship("Donation_order", backref="user")
+    posts = db.relationship("Posts", backref="user")
+    comments = db.relationship("Comments", backref="user")
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -37,7 +39,9 @@ class User(db.Model):
                 'date_last_donation': self.date_last_donation,
                 'state': self.state,
                 'city': self.city,
-                'donations_orders': f'{self.get_donations()}'
+                'donations_orders': f'{self.get_donations()}',
+                'posts': f'{self.get_posts()}',
+                'comments': f'{self.get_comments()}'
             }
 
     def set_password(self, password):
@@ -48,11 +52,22 @@ class User(db.Model):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
     
     def get_donations(self):
-         
          orders_list = []
          for i in range(len(self.donation_order)):
               orders_list.append(self.donation_order[i].id)
          return orders_list
+    
+    def get_posts(self):
+         posts_list = []
+         for i in range(len(self.posts)):
+              posts_list.append(self.posts[i].id)
+         return posts_list
+    
+    def get_comments(self):
+         comments_list = []
+         for i in range(len(self.comments)):
+              comments_list.append(self.comments[i].id)
+         return comments_list
 
 class Hospitals(db.Model):
      id = db.Column(db.Integer, primary_key=True)
@@ -107,3 +122,50 @@ class Donation_order(db.Model):
                 'requester': self.requester,
                 'status': self.status
             }
+     
+class Posts(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100))
+    content = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    comments = db.relationship('Comments', backref='post')
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+    def __repr__(self):
+        return f'<Post "{self.title}">'
+    
+    def to_dict(self):
+         return{
+              'id': self.id,
+              'title': self.title,
+              'content': self.content,
+              'created at': self.created_at,
+              'comments': f'{self.get_comments()}',
+              'user_id': self.user_id
+         }
+    
+    def get_comments(self):
+         
+         comments_list = []
+         for i in range(len(self.comments)):
+              comments_list.append(self.comments[i].id)
+         return comments_list
+
+class Comments(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Comment "{self.content[:20]}...">'
+    
+    def to_dict(self):
+         return {
+              'id': self.id,
+              'content': self.content,
+              'post_id': self.post_id,
+              'created_at': self.created_at,
+              'user_id': self.user_id
+         }
