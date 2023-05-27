@@ -56,7 +56,7 @@ def get_user_by_username(username):
         return jsonify({"Error": "User not found"}), 404
     return jsonify(user.to_dict()), 200
 
-@jwt_required()
+#@jwt_required()
 @app.route('/users/<int:id>', methods=['GET'])
 def get_user_by_id(id):
     user = User.query.get(id)
@@ -64,7 +64,7 @@ def get_user_by_id(id):
         return jsonify({"Error": "User not found"}), 404
     return jsonify(user.to_dict()), 200
 
-@jwt_required()   
+#@jwt_required()   
 @app.route('/users/<string:username>', methods=['PUT'])
 def update_user_by_username(username):
     user = User.query.filter_by(username=username).first()
@@ -76,7 +76,7 @@ def update_user_by_username(username):
     db.session.commit()
     return jsonify(user.to_dict()), 200
 
-@jwt_required()
+#@jwt_required()
 @app.route('/users/<string:username>', methods=['DELETE'])
 def delete_user_by_username(username):
     user = User.query.filter_by(username=username).first()

@@ -15,7 +15,7 @@ def get_donations_orders():
   donations_orders = Donation_order.query.all()
   return jsonify(donations_orders=[donation_order.to_dict() for donation_order in donations_orders]), 200
 
-@app.route("/donations_orders/<int:donation_order_id>")
+@app.route("/donations_orders/<int:donation_order_id>", methods=["GET"])
 def get_donation_order_by_id(donation_order_id):
   donation_order = Donation_order.query.get(donation_order_id)
   if donation_order is None:
