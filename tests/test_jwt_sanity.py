@@ -2,8 +2,8 @@ import requests, json, pytest
 
 from . import utils
 
-#URL = 'http://localhost:5000'
-URL = 'https://doevida.onrender.com/'
+URL = 'http://localhost:5000'
+#URL = 'https://doevida.onrender.com/'
 
 @pytest.fixture(scope="session")
 def url():
