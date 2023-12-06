@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 116460b6d275
+Revision ID: 42a6a0c870dc
 Revises: 
-Create Date: 2023-05-27 15:46:08.761088
+Create Date: 2023-12-05 18:20:54.954321
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '116460b6d275'
+revision = '42a6a0c870dc'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,6 +26,8 @@ def upgrade():
     sa.Column('donations_orders', sa.Integer(), nullable=True),
     sa.Column('donations_orders_done', sa.Integer(), nullable=True),
     sa.Column('donations_orders_cancelled', sa.Integer(), nullable=True),
+    sa.Column('latitude', sa.Float(), nullable=True),
+    sa.Column('longitude', sa.Float(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('hospital_name')
     )
@@ -43,13 +45,15 @@ def upgrade():
     sa.Column('date_last_donation', sa.String(length=10), nullable=True),
     sa.Column('state', sa.String(length=30), nullable=True),
     sa.Column('city', sa.String(length=60), nullable=True),
+    sa.Column('password_reset_token', sa.String(length=6), nullable=True),
+    sa.Column('photo', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('username')
     )
     op.create_table('donation_order',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('patient_name', sa.String(length=80), nullable=False),
-    sa.Column('blood_type', sa.Integer(), nullable=False),
+    sa.Column('blood_type', sa.String(length=3), nullable=False),
     sa.Column('description', sa.String(length=500), nullable=True),
     sa.Column('qty_bags', sa.Integer(), nullable=True),
     sa.Column('date_donation_order', sa.DateTime(), nullable=True),

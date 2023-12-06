@@ -6,15 +6,20 @@ from flask_jwt_extended import JWTManager
 from datetime import timedelta
 from flask_cors import CORS
 import os
+#load_dotenv()
 
-# Here is the where we configure our application, initialize objects like database and the flask_app itself
+#DATABASE_URI = os.getenv('DATABASE_URI')
 
 app = Flask(__name__) # creates a flask app with the name of the file as a parameter
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://doevida_user:SaNBGSFEl7mdH4NkatCYGCBvDS8Ucy87@dpg-chp4ph2k728ivvrq1o90-a.oregon-postgres.render.com/doevida' #os.environ.get("DATABASE_URI")
-app.config["JWT_SECRET_KEY"] = 'zGEHihvhaCxwaOnLfsPB6isU96YQzbV4' #os.environ.get("JWT_SECRET_KEY")
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URI")
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://doe_vida_database_user:2xkoGzBu5fDNye2PLfwZff9Msq6fEK0K@dpg-cjrr5kojbais73fd2mf0-a.oregon-postgres.render.com/doe_vida_database' OLD
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://doe_vida_database2_user:18ilykINyAoUevWguk4OoqQPjI3IyG0Z@dpg-clnp65ofvntc73b5iueg-a.oregon-postgres.render.com/doe_vida_database2'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///seu_banco_de_dados.db' # local data base for development
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
+app.config["JWT_SECRET_KEY"] = 'zGEHihvhaCxwaOnLfsPB6isU96YQzbV4'
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
-app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30) 
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 jwt__ = JWTManager(app)
 db = SQLAlchemy(app) # initialize sqlalchemy object
 migrate = Migrate(app, db)
